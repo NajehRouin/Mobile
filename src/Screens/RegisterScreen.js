@@ -1,37 +1,35 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Image, PermissionsAndroid, Platform, Alert  } from 'react-native';
-import { TextInput, Button, Text, useTheme } from 'react-native-paper';
+import React, {useState} from 'react';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  PermissionsAndroid,
+  Platform,
+  Alert,
+} from 'react-native';
+import {TextInput, Button, Text, useTheme} from 'react-native-paper';
 import * as ImagePicker from 'react-native-image-picker';
 
-import { API_BASE_URL } from '@env';
+import {API_BASE_URL} from '@env';
 import axios from 'axios';
 
-
-const RegisterScreen = ({ navigation }) => {
+const RegisterScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [cin, setCin] = useState('');
   const [numPhone, setNumPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [photo,SetPhoto]=useState('')
+  const [photo, SetPhoto] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [profileImage, setProfileImage] = useState(null); // State to store the selected image
   const theme = useTheme();
 
- 
-
-
-
-
-
   const selectImage = async () => {
-  
-    
-    ImagePicker.launchImageLibrary({ mediaType: 'photo' },async response => {
+    ImagePicker.launchImageLibrary({mediaType: 'photo'}, async response => {
       if (response.assets && response.assets.length > 0) {
         setProfileImage(response.assets[0].uri); // Set the selected image URI
 
-        console.log("response.assets[0].uri",response.assets[0].fileName)
         const formData = new FormData();
         formData.append('file', {
           uri: response.assets[0].uri,
@@ -39,10 +37,8 @@ const RegisterScreen = ({ navigation }) => {
           type: response.assets[0].type, // Mettez le type MIME de l'image sélectionnée
         });
 
-
         try {
-
-          const response = await fetch(`${API_BASE_URL}/photo`, { 
+          const response = await fetch(`${API_BASE_URL}/photo`, {
             method: 'POST',
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -50,49 +46,93 @@ const RegisterScreen = ({ navigation }) => {
             body: formData,
           });
           const data = await response.json();
-          if(data.success){
-            SetPhoto(data.result.filename)
-           
+          if (data.success) {
+            SetPhoto(data.result.filename);
           }
-      
         } catch (error) {
-          console.error("An error occurred:", error);
-          Alert.alert("Network Error", "Please try again later.");
+          console.error('An error occurred:', error);
+          Alert.alert('Network Error', 'Please try again later.');
         }
-        
-
       }
     });
   };
 
+  const [errors, setErrors] = useState({
+    name: '',
+    email: '',
+    cin: '',
+    numPhone: '',
+    password: '',
+  });
+
+  const validateInputs = () => {
+    let isValid = true;
+    let errors = {
+      name: '',
+      email: '',
+      cin: '',
+      numPhone: '',
+      password: '',
+    };
+
+    // Validation pour le nom
+    if (name.trim() === '') {
+      errors.name = 'Le nom est requis.';
+      isValid = false;
+    }
+
+    // Validation pour le numéro CIN
+    if (cin.length < 8) {
+      errors.cin = 'Le numéro CIN doit contenir au moins 8 chiffres.';
+      isValid = false;
+    }
+
+    // Validation pour le numéro de téléphone
+    if (numPhone.length < 8) {
+      errors.numPhone =
+        'Le numéro de téléphone doit contenir au moins 8 chiffres.';
+      isValid = false;
+    }
+
+    // Validation pour le format de l'email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      errors.email = "L'email n'est pas valide.";
+      isValid = false;
+    }
+    if (password.trim() === '') {
+      errors.password = 'Le mot de pass  est requis.';
+      isValid = false;
+    }
+    setErrors(errors);
+    return isValid;
+  };
+
   const handleRegister = async () => {
+    if (!validateInputs()) return;
     try {
-     
       const response = await fetch(`${API_BASE_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email,cin, password,numPhone,photo}),
+        body: JSON.stringify({name, email, cin, password, numPhone, photo}),
       });
 
       const result = await response.json();
       //console.log("result",response.status)
-      if (response.status===302) {
-    
+      if (response.status === 302) {
         // Show toast or alert based on the message returned
         Alert.alert(result.msg);
-     
-      } else  {
+      } else {
         // Navigate to the next screen
-      // navigation.navigate('Login');
-      } 
+        navigation.navigate('Login');
+      }
     } catch (error) {
-      console.error("An error occurred:", error);
-      Alert.alert("Network Error", "Please try again later.");
+      console.error('An error occurred:', error);
+      Alert.alert('Network Error', 'Please try again later.');
     }
   };
-
 
   return (
     <View style={styles.container}>
@@ -101,7 +141,7 @@ const RegisterScreen = ({ navigation }) => {
       {/* Circular Image Upload Area */}
       <TouchableOpacity onPress={selectImage} style={styles.imageContainer}>
         {profileImage ? (
-          <Image source={{ uri: profileImage }} style={styles.image} />
+          <Image source={{uri: profileImage}} style={styles.image} />
         ) : (
           <Text style={styles.imagePlaceholder}>+</Text> // Placeholder text
         )}
@@ -114,6 +154,7 @@ const RegisterScreen = ({ navigation }) => {
         style={styles.input}
         mode="outlined"
       />
+      {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
       <TextInput
         label="Email"
         value={email}
@@ -123,6 +164,9 @@ const RegisterScreen = ({ navigation }) => {
         keyboardType="email-address"
         autoCapitalize="none"
       />
+      {errors.email ? (
+        <Text style={styles.errorText}>{errors.email}</Text>
+      ) : null}
       <TextInput
         label="Mot de passe"
         value={password}
@@ -138,6 +182,9 @@ const RegisterScreen = ({ navigation }) => {
           />
         }
       />
+      {errors.password ? (
+        <Text style={styles.errorText}>{errors.password}</Text>
+      ) : null}
       <TextInput
         label="N°Cin"
         value={cin}
@@ -151,6 +198,7 @@ const RegisterScreen = ({ navigation }) => {
         keyboardType="numeric"
         maxLength={8}
       />
+      {errors.cin ? <Text style={styles.errorText}>{errors.cin}</Text> : null}
       <TextInput
         label="N°Téléphone"
         value={numPhone}
@@ -164,21 +212,22 @@ const RegisterScreen = ({ navigation }) => {
         keyboardType="numeric"
         maxLength={8}
       />
+      {errors.numPhone ? (
+        <Text style={styles.errorText}>{errors.numPhone}</Text>
+      ) : null}
       <Button
         mode="contained"
         onPress={handleRegister}
         style={styles.button}
-        contentStyle={styles.buttonContent}
-      >
+        contentStyle={styles.buttonContent}>
         S'inscrire
       </Button>
       <Button
         mode="text"
         onPress={() => navigation.navigate('Login')}
         style={styles.Login}
-        labelStyle={{ color: theme.colors.primary }}
-      >
-     Vous avez déjà un compte ? Se connecter
+        labelStyle={{color: theme.colors.primary}}>
+        Vous avez déjà un compte ? Se connecter
       </Button>
     </View>
   );
@@ -231,8 +280,15 @@ const styles = StyleSheet.create({
   buttonContent: {
     paddingVertical: 8,
   },
-  Login:{
+  Login: {
     marginTop: 10,
     alignSelf: 'center',
-  }
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: -10,
+    marginBottom: 5,
+    fontWeight: 'bold',
+  },
 });
