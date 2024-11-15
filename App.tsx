@@ -14,12 +14,14 @@ import DemandeSceen from './src/Screens/DemandeSceen';
 import AnalyseScreen from './src/Screens/AnalyseScreen';
 import ResultatScreen from './src/Screens/ResultatScreen';
 import DetailAnalyseScreen from './src/Screens/DetailAnalyseScreen';
+import ForgetPassScreen from './src/Screens/ForgetPassScreen';
 
 // Define the types for each screen in the navigator
 type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
   Register: undefined;
+  forgetpass: undefined;
   Nav: undefined;
   demande: undefined;
   analyse: undefined;
@@ -57,11 +59,19 @@ const AppNavigator = () => {
         component={RegisterScreen}
         options={{headerShown: false}}
       />
+
+      <Stack.Screen
+        name="forgetpass"
+        component={ForgetPassScreen}
+        options={{headerShown: false}}
+      />
+
       <Stack.Screen
         name="Nav"
         component={MainTabs}
         options={{headerShown: false}}
       />
+
       <Stack.Screen
         name="demande"
         component={DemandeSceen}

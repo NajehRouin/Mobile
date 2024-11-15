@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
-import {View, StyleSheet, Alert, NativeModules} from 'react-native';
+import {View, StyleSheet, Alert, TouchableOpacity} from 'react-native';
 import {TextInput, Button, Text, useTheme} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {API_BASE_URL} from '@env';
-import Icon from 'react-native-vector-icons/Ionicons';
 
 const LoginScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
@@ -135,6 +134,9 @@ const LoginScreen = ({navigation}) => {
         contentStyle={styles.buttonContent}>
         Se connecter
       </Button>
+      <TouchableOpacity onPress={() => navigation.navigate('forgetpass')}>
+        <Text style={styles.oublie}>mot de passe oublié</Text>
+      </TouchableOpacity>
 
       <Button
         mode="text"
@@ -173,8 +175,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   registerButton: {
-    marginTop: 10,
+    marginTop: 3,
     alignSelf: 'center',
+  },
+  oublie: {
+    marginTop: 5,
+    alignSelf: 'flex-end',
+    textDecorationLine: 'underline',
+    color: 'red',
   },
   errorText: {
     color: 'red',

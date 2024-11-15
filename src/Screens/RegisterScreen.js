@@ -12,7 +12,6 @@ import {TextInput, Button, Text, useTheme} from 'react-native-paper';
 import * as ImagePicker from 'react-native-image-picker';
 
 import {API_BASE_URL} from '@env';
-import axios from 'axios';
 
 const RegisterScreen = ({navigation}) => {
   const [email, setEmail] = useState('');
